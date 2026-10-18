@@ -1,6 +1,6 @@
 # CS 122, Fall 2026 Project
 ## Team: Ashley Roman and Ashley Dai
-## Project Name: Piece by Piece: An Analysis of Chess 
+## Project Name: Piece by Piece — An Analysis of Chess 
 
 ## Project Description
 This project will investigate the relationship between different statistics in chess games — like that between the opening player, the moves they make, the total number of turns, victory status, and more. With this, we aim analyze how game variables can positively or negatively influence game outcomes. For example, is there a significant comparison between players who make the first move, and win in a mate? We plan to achieve this by first processing the data into the most relevant statistics, then by using data analysis and visualization methods to identify patterns between the variables, all done collaborately via GitHub. At the end, this data will be available to see and interact with on a web-hosted Python interface.
