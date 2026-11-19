@@ -1,11 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess Win Rates: White vs. Black</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.5; margin: 2rem; }
+    th, td { padding: 0.25rem 1rem 0.25rem 0; text-align: left; }
+  </style>
 </head>
 <body>
-    <p>hello</p>
+  <main>
+    <h1>Chess Win Rates: White vs. Black</h1>
+    <p id="status" role="status">Loading win rates...</p>
+    <table id="win-rates" hidden>
+      <thead>
+        <tr>
+          <th scope="col">Side</th>
+          <th scope="col">Wins</th>
+          <th scope="col">Win rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">White</th>
+          <td id="white-wins"></td>
+          <td id="white-rate"></td>
+        </tr>
+        <tr>
+          <th scope="row">Black</th>
+          <td id="black-wins"></td>
+          <td id="black-rate"></td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+  <script>
+    async function loadWinRates() {
+      const status = document.getElementById("status");
+
+      try {
+        const response = await fetch({{ url_for("win_rates") | tojson }});
+        if (response.status === 503) {
+          const { error } = await response.json();
+          status.textContent = error;
+          return;
+        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const { decisive_games, sides } = await response.json();
+        if (decisive_games === 0) {
+          status.textContent = "No decisive games found. Draws are excluded.";
+          return;
+        }
+
+        for (const [side, { wins, rate }] of Object.entries(sides)) {
+          document.getElementById(`${side}-wins`).textContent = wins.toLocaleString();
+          document.getElementById(`${side}-rate`).textContent = `${rate.toFixed(2)}%`;
+        }
+
+        status.textContent = `Win rates are based on ${decisive_games.toLocaleString()} decisive games from the Lichess dataset. Draws are excluded.`;
+        document.getElementById("win-rates").hidden = false;
+      } catch (error) {
+        status.textContent = "Unable to load win rates.";
+        console.error(error);
+      }
+    }
+
+    loadWinRates();
+  </script>
 </body>
 </html>
