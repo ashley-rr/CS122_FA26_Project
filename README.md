@@ -27,8 +27,8 @@ After preprocessing, the data will be stored into a .csv file, and uploaded to G
 ## Data Analysis and Visualization Plan (Ashley Dai)
 * Most/Least popular opening moves (Top 10)
   * Frequency Bar Chart
-* Is there a statistically significant difference in the proportion of games won by white and black (does not include draws)? 
-  * Statistical Test: One Sample Proportion Test
+* Is there statistically significant evidence that the proportion of White wins is higher than the proportion of Black wins (excluding draws)? 
+  * Statistical Test: One Sample Proportion Z-Test
   * Pie Chart showing white/black overall winrate
 * Which opening moves have highest/lowest win rates for white and black?
   * Bar Chart
