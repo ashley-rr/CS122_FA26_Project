@@ -31,7 +31,7 @@ class AnalysisTests(unittest.TestCase):
             {"name": "Opening A", "games": 100, "mean": 30.0}
         ])
 
-    def test_page_and_existing_api_use_same_data(self):
+    def test_page_displays_analysis_and_conclusion(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "games.csv"
             path.write_text(
@@ -46,14 +46,18 @@ class AnalysisTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertIn(b"66.67%", response.data)
                 self.assertIn(b"Test Opening", response.data)
-                self.assertEqual(client.get("/api/win-rates").json["decisive_games"], 3)
+                self.assertIn(b'Where could research go next?', response.data)
+                self.assertGreater(
+                    response.data.index(b'id="conclusion"'),
+                    response.data.index(b'id="length"'),
+                )
+                self.assertEqual(client.get("/api/win-rates").status_code, 404)
 
     def test_missing_data_is_reported(self):
         with tempfile.TemporaryDirectory() as directory:
             with patch("gui.app.GAMES_CSV", Path(directory) / "missing.csv"):
                 client = app.test_client()
                 self.assertEqual(client.get("/").status_code, 503)
-                self.assertEqual(client.get("/api/win-rates").status_code, 503)
                 self.assertIn(b"Could not find data/games.csv", client.get("/").data)
 
     def test_notebook_plots_serve_saved_cell_images(self):

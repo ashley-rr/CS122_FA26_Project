@@ -34,6 +34,7 @@
         <a href="#color">White vs. Black</a>
         <a href="#rates">Opening win rates</a>
         <a href="#length">Game length</a>
+        <a href="#conclusion">Conclusion</a>
       </nav>
     </div>
   </header>
@@ -46,7 +47,7 @@
 
       <section class="card">
         <p>
-          <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <strong>{{ "{:,}".format(analysis.total_games) }}</strong> games from Lichess.
+          <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <em>{{ "{:,}".format(analysis.total_games) }}</em> games from Lichess.
           The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle: <a href="https://www.kaggle.com/datasets/datasnaek/chess/data">link</a>.
         </p>
         <!-- <div class="intro">
@@ -124,11 +125,6 @@
 
         <p class="lede">
           <strong>Definition</strong>: In Chess, the White side plays the first move. 
-        </p>
-        
-        <p class="lede">
-          <strong>Figure 2</strong>
-          is a pie chart comparison between games won by Black vs. White. Drawn games are not included in the calculation.
         </p>
 
         {% set wins = analysis.win_rates %}
@@ -241,41 +237,132 @@
       </section>
 
       <section class="card" id="length">
+
         <div class="section-label">04 / Game length</div>
+        
         <h2>Do openings lead to different game lengths?</h2>
-        <p class="lede">The notebook compares the ten most common named opening families, excluding Other. It applies a square-root transformation to recorded turns before the one-way ANOVA.</p>
-        <div class="insight"><strong>The takeaway.</strong> The notebook reports p = 5.30e-39 for the ANOVA. This suggests at least one group mean differs on the transformed scale, but it does not identify which groups differ or establish a practically large difference.</div>
 
-        <h3>Game length distributions</h3>
-        <p>The box plots show the square root of game length, not raw turns. The notebook notes some large outliers, while medians and interquartile ranges are relatively similar.</p>
-        {{ plot('game-length', 'Box plots of square-root-transformed game lengths for the ten most common named opening families, with outliers.', 'Notebook figure: distribution of square-root-transformed turns by opening family.') }}
+        <p class="lede">
+          We compare the ten most common openings &lpar;excluding "Other"&rpar; to game lengths by using an ANOVA test.
+        </p>
+
+        <div class="insight">
+          <p><strong>One way ANOVA Test Set-up</strong>: Let <em>μ</em> = the population mean game length for a opening move, and <em>alpha (significance level)</em> = 0.05.</p> 
+          <p>Set up the Null Hypothesis: H<sub>0</sub>: μ<sub>1</sub> = μ<sub>2</sub> = ... = μ<sub>10</sub>; the 10 most popular openings have the same population mean game length.</p>
+          <p>Set up the Alternative Hypothesis: At least one of the 10 most popular openings has a different population mean game length. </p>
+          <p>Assume that each game is independent, the games have a normal approximation distribution, and variance is constant.</p>
+        </div>
+
+        {{ plot('qq-original', 
+          'Ten normal QQ-plots of original game lengths, one for each of the most common named opening families.', 
+          'Figure 4.1: QQ-plots before the square-root transformation.'
+        ) }}
+
+        <p>
+          Looking at the QQ-plots, we see that points curve away from the line of best fit near the ends, which suggest that the data is right skewed.
+          Thus, we cannot assume normality, and need to perform a square-root transformation.
+        </p> 
+
+        {{ plot('qq-transformed', 
+          'Ten normal QQ-plots of square-root-transformed game lengths, one for each opening family.', 
+          'Figure 4.2: QQ-plots after the square-root transformation.') 
+        }}
+
+        <p>
+          That's better! Now, we can assume normality for a residual test.
+        </p> 
+
+        {{ plot('residuals', 
+          'Scatter plot of transformed game-length residuals against opening-family means, with a zero reference line.', 
+          'Figure 4.3: Residuals vs. group means after transformation.') 
+        }}
+
+        <p>
+          The residual plots show no distinct cone shape, so we can still assume constant variance.
+        </p> 
+        <p>
+          Finally, we can show the spread of game lengths by opening family via a box-plot.
+        </p>
+
+        {{ plot('game-length', 
+          'Box plots of square-root-transformed game lengths for the ten most common named opening families, with outliers.', 
+          'Figure 4.4: Distribution of the square-root of turns by opening family.'
+        ) }} 
+
+        <div class="insight">
+          <p>
+            <strong>Key Takeaway:</strong> 
+            Our <em>p-value</em> ends up being 5.3007E-39 &lt; <em>alpha</em> = 0.05. Therefore, we reject the Null Hypothesis. Conclusively, 
+            there is statistically significant evidence that at least one of the ten most common openings has a different population mean
+            game length. 
+          </p>
+          
+          <p>
+            And looking at the distributions of each opening family, some contain large outliers, which could contribute to differences in the group means.
+            Otherwise, medians and interquartile ranges are relatively similar across openings.
+          </p>
+        </div>
+
         <details>
-          <summary>View current average game lengths</summary>
-          <p class="note">These descriptive averages are in raw recorded turns, unlike the transformed values in the notebook's box plots and ANOVA.</p>
+          <summary>View average game lengths</summary>
+          <p class="note">Turns include both White and Black's turns.</p>
           {% if analysis.lengths %}
-            <div class="table-wrap"><table>
-              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th><th scope="col">Average turns</th></tr></thead>
-              <tbody>{% for opening in analysis.lengths %}
-                <tr><th scope="row">{{ opening.name }}</th><td>{{ "{:,}".format(opening.games) }}</td><td>{{ "%.1f"|format(opening.mean) }}</td></tr>
-              {% endfor %}</tbody>
-            </table></div>
-          {% else %}<p>No named opening families found.</p>{% endif %}
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Opening family</th><th scope="col">Games</th>
+                    <th scope="col">Average turns</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for opening in analysis.lengths %}
+                    <tr>
+                      <th scope="row">{{ opening.name }}</th>
+                      <td>{{ "{:,}".format(opening.games) }}</td>
+                      <td>{{ "%.1f"|format(opening.mean) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No named opening families found.</p>
+          {% endif %}
         </details>
-
-        <h3>Checking the assumptions</h3>
-        <p>The ANOVA compares equal transformed group means against the alternative that at least one differs. The notebook assumes independent games and examines normality and constant variance using the following diagnostic plots. Visual checks do not prove these assumptions.</p>
-        <h3>Before transformation</h3>
-        <p>The original Q-Q plots curve away from the reference lines at the upper end, suggesting right-skewed game lengths.</p>
-        {{ plot('qq-original', 'Ten normal Q-Q plots of original game lengths, one for each of the most common named opening families.', 'Notebook figure: Q-Q plots before the square-root transformation.') }}
-        <h3>After transformation</h3>
-        <p>The notebook observes that the transformed points follow the reference lines more closely.</p>
-        {{ plot('qq-transformed', 'Ten normal Q-Q plots of square-root-transformed game lengths, one for each opening family.', 'Notebook figure: Q-Q plots after the square-root transformation.') }}
-        <h3>Residuals</h3>
-        <p>The notebook notes no distinct cone shape in the residual plot, supporting its constant-variance assumption.</p>
-        {{ plot('residuals', 'Scatter plot of transformed game-length residuals against opening-family means, with a zero reference line.', 'Notebook figure: residuals versus group means after transformation.') }}
       </section>
-      <footer>Charts and test results are from the saved data analysis notebook. Tables use the current local dataset.</footer>
+
+      <section class="card" id="conclusion">
+        <div class="section-label">05 / Conclusion</div>
+        <h2>In Conclusion...</h2>
+        <p>
+          In this collection of Lichess games, players used a wide variety of openings, with
+          Sicilian Defense the most common named opening umbrella. White won slightly more often than
+          Black among decisive games, but win rates varied across opening families. The
+          game-length test also found evidence that at least one opening family's mean differs
+          on the square-root-transformed scale.
+        </p>
+        <p>
+          Our findings do not prove that playing a specific opening, or playing the first move,
+          can lead to a better game outcome. Hoever, our findings still show how color, opening, 
+          and game length can help describe patterns in chess.
+        </p>
+
+        <h3>Future Work</h3>
+        <p>
+          If we were to continue our research, there are
+        </p>
+        <ul>
+          <li>Compare games across player ratings, time controls, and rated versus casual play to see whether these patterns change.</li>
+          <li>Study draws and more specific opening variations, including those grouped into "Other".</li>
+          <li>Use confidence intervals and follow-up comparisons between opening families to measure the size of differences and identify which groups differ.</li>
+          <li>Examine independent samples from other time periods or platforms, accounting for players who appear in multiple games.</li>
+        </ul>
+      </section>
+
     {% endif %}
+
   </main>
 </body>
+
 </html>

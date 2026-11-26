@@ -5,7 +5,7 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from flask import Flask, Response, abort, jsonify, render_template
+from flask import Flask, Response, abort, render_template
 
 app = Flask(__name__)
 GAMES_CSV = Path(__file__).resolve().parents[1] / "data" / "games.csv"
@@ -96,14 +96,6 @@ def index():
         app.logger.error("Invalid games CSV: %s", exc)
         return render_template("index.html", error="The games data is invalid. Check the server logs."), 503
     return render_template("index.html", analysis=analysis)
-
-
-@app.get("/api/win-rates")
-def win_rates():
-    try:
-        return jsonify(get_win_rates(GAMES_CSV))
-    except FileNotFoundError:
-        return jsonify(error="Could not find data/games.csv."), 503
 
 
 @app.get("/notebook-plots/<plot_name>")
