@@ -17,6 +17,9 @@ This project will investigate the relationship between different statistics in c
 * Interactive Pie Chart: Toggle between White and Black to view their overall win rates.
 * Interactive Bar Chart: Toggle between White and Black to compare win rates across opening moves, with a dropdown menu to select an opening move.
 
+## Run the interface
+From the project root, install the interface dependency with `python -m pip install -r requirements.txt`, then run `python -m flask --app gui.app run` and open the local address displayed by Flask. The page reads `data/games.csv` for its tables and displays the saved plot outputs from `notebooks/data_analysis.ipynb`. Charts, conclusions, and statistical test results are not recalculated by the interface: rerun and save the notebook to update its plots and results after changing the data, and update the page's written interpretations as needed. If a plot is missing, run and save its notebook cell.
+
 ## Data Collection and Storage Plan (Ashley Roman)
 We will use this .csv dataset of Lichess chess games from Kaggle: https://www.kaggle.com/datasets/datasnaek/chess/data. 
 

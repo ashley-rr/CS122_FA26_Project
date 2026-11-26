@@ -3,71 +3,184 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chess Win Rates: White vs. Black</title>
-  <style>
-    body { font-family: system-ui, sans-serif; line-height: 1.5; margin: 2rem; }
-    th, td { padding: 0.25rem 1rem 0.25rem 0; text-align: left; }
-  </style>
+  <title>Piece by Piece | Chess Analysis</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
-  <main>
-    <h1>Chess Win Rates: White vs. Black</h1>
-    <p id="status" role="status">Loading win rates...</p>
-    <table id="win-rates" hidden>
-      <thead>
-        <tr>
-          <th scope="col">Side</th>
-          <th scope="col">Wins</th>
-          <th scope="col">Win rate</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">White</th>
-          <td id="white-wins"></td>
-          <td id="white-rate"></td>
-        </tr>
-        <tr>
-          <th scope="row">Black</th>
-          <td id="black-wins"></td>
-          <td id="black-rate"></td>
-        </tr>
-      </tbody>
-    </table>
+
+  {% macro plot(name, alt, caption, compact=false) %}
+    <figure 
+      {% if compact %} 
+        class="compact-plot"
+      {% endif %}
+    >
+      <img src="{{ url_for('notebook_plot', plot_name=name) }}" alt="{{ alt }}" loading="lazy"
+           onerror="this.hidden = true; this.nextElementSibling.hidden = false">
+
+      <p class="plot-error" hidden>This saved notebook plot is unavailable. Check that the notebook exists and its plot cell has been run and saved.</p>
+      
+      <figcaption>{{ caption }}</figcaption>
+    </figure>
+  {% endmacro %}
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">A data story about chess</div>
+      <h1>Piece by Piece</h1>
+      <p>Exploring openings, outcomes, and game length in a collection of Lichess games.</p>
+      <nav aria-label="Page sections">
+        <a href="#openings">Opening popularity</a>
+        <a href="#color">White vs. Black</a>
+        <a href="#rates">Opening win rates</a>
+        <a href="#length">Game length</a>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="wrap">
+
+    {% if error %}
+      <div class="intro" role="alert">{{ error }}</div>
+    {% else %}
+
+    <section class="card">
+      <p>
+        <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <strong>{{ "{:,}".format(analysis.total_games) }}</strong> games from Lichess.
+        The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle: <a href="https://www.kaggle.com/datasets/datasnaek/chess/data">link</a>.
+      </p>
+      <!-- <div class="intro">
+        
+      </div> -->
+    </section>
+
+      <section class="card" id="openings">
+        <div class="section-label">01 / Opening popularity</div>
+
+        <h2>Most vs. Least Popular Opening Moves</h2>
+        
+        <p class="lede">
+          <strong>Definition</strong>: The first moves by either side in a chess game. 
+          Common opening moves have standard names, such as the "Sicilian Defense". 
+        </p>
+
+        <p class="lede">
+          <strong>Data Organization</strong>: The original dataset had over <em>{{ "{:,}".format(19000) }}</em> unique opening moves,
+          including variations of standard openings. We narrowed this down to <em>18</em> umbrella openings, and 1 fallback category ("Other").
+        </p>
+
+        <p class="lede"><strong>Figure 1</strong> shows the frequency of the top 10 most popular opening moves.</p>
+        
+        {{ plot('opening-frequency', 
+            'Horizontal bar chart of the ten most frequent opening families. Other is largest, followed by Sicilian Defense.', 
+            'Figure 1: Frequency of the top 10 opening families.') 
+        }}
+        
+        <div class="insight">
+          <p>
+            <strong>Key Takeaway</strong>: The most frequent opening moves fall into the <em>"Other"</em> category, reflecting a lot of variation in opening moves. The <em>"Sicilian Defense"</em>
+          is the second most frequent opening, beating the third opening by over 1,200 games. 
+          </p>
+          <p>
+            Chess.com describes the <em>"Sicilian Defense"</em> as a "employed by masters and beginners alike... a reputable and positionally sound opening... that tends to lead to dynamic and sharp positions."
+            Assumedly, this opening is popular for its flexibility.
+          </p>
+        </div>
+
+        <details>
+          <summary>View current opening counts</summary>
+          {% if analysis.popular %}
+            <div class="table-wrap"><table>
+              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th></tr></thead>
+              <tbody>{% for name, count in analysis.popular %}
+                <tr><th scope="row">{{ name }}</th><td>{{ "{:,}".format(count) }}</td></tr>
+              {% endfor %}</tbody>
+            </table></div>
+          {% else %}<p>No games found.</p>{% endif %}
+        </details>
+        
+      </section>
+
+      <section class="card" id="color">
+        <div class="section-label">02 / Overall results</div>
+        <h2>Does White win more often?</h2>
+        {% set wins = analysis.win_rates %}
+        <p class="lede">This comparison excludes draws and looks only at games won by White or Black.</p>
+        {% if wins.decisive_games %}
+          <div class="stats">
+            <div class="stat"><strong>{{ "%.2f"|format(wins.sides.white.rate) }}%</strong><span>White wins</span></div>
+            <div class="stat"><strong>{{ "%.2f"|format(wins.sides.black.rate) }}%</strong><span>Black wins</span></div>
+            <div class="stat"><strong>{{ "{:,}".format(wins.decisive_games) }}</strong><span>decisive games</span></div>
+          </div>
+        {% else %}<p>No decisive games found.</p>{% endif %}
+        {{ plot('win-rate', 'Pie chart comparing the shares of decisive games won by White and by Black.', 'Notebook figure: win rates by color, excluding draws.', true) }}
+        <div class="insight"><strong>The takeaway.</strong> The notebook's one-sided proportion z-test reports p = 4.8e-11, below 0.05. It finds evidence that White won more often in this dataset; this association alone does not establish cause.</div>
+        <details>
+          <summary>Test setup and current counts</summary>
+          <p>Null hypothesis: White wins 50% of decisive games. Alternative: White wins more than 50%. The notebook assumes random sampling, independent games, and a valid normal approximation.</p>
+          <div class="table-wrap"><table>
+            <thead><tr><th scope="col">Side</th><th scope="col">Wins</th></tr></thead>
+            <tbody>{% for side in ["white", "black"] %}
+              <tr><th scope="row">{{ side|capitalize }}</th><td>{{ "{:,}".format(wins.sides[side].wins) }}</td></tr>
+            {% endfor %}</tbody>
+          </table></div>
+        </details>
+      </section>
+
+      <section class="card" id="rates">
+        <div class="section-label">03 / Opening outcomes</div>
+        <h2>Which openings have the highest win rates?</h2>
+        <p class="lede">The notebook compares the five highest and five lowest rates for each color, among opening families with at least 100 games. Here, draws are included in each opening's total, so White and Black rates do not add up to 100%.</p>
+        {{ plot('opening-win-rates', 'Four bar charts showing the five highest and lowest opening-family win rates for White and for Black.', 'Notebook figure: highest and lowest win rates by opening family.') }}
+        <div class="insight"><strong>The takeaway.</strong> King's Gambit has the highest White win rate in the notebook, while Van't Kruijs Opening has the highest Black win rate. These are observed rates, not evidence that an opening causes a win.</div>
+        <details>
+          <summary>View all qualifying opening families in the current data</summary>
+          {% if analysis.opening_rates %}
+            <div class="table-wrap"><table>
+              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th><th scope="col">White wins</th><th scope="col">Black wins</th></tr></thead>
+              <tbody>{% for opening in analysis.opening_rates %}
+                <tr><th scope="row">{{ opening.name }}</th><td>{{ "{:,}".format(opening.games) }}</td><td>{{ "%.2f"|format(opening.white) }}%</td><td>{{ "%.2f"|format(opening.black) }}%</td></tr>
+              {% endfor %}</tbody>
+            </table></div>
+          {% else %}<p>No opening families have at least 100 games.</p>{% endif %}
+        </details>
+      </section>
+
+      <section class="card" id="length">
+        <div class="section-label">04 / Game length</div>
+        <h2>Do openings lead to different game lengths?</h2>
+        <p class="lede">The notebook compares the ten most common named opening families, excluding Other. It applies a square-root transformation to recorded turns before the one-way ANOVA.</p>
+        <div class="insight"><strong>The takeaway.</strong> The notebook reports p = 5.30e-39 for the ANOVA. This suggests at least one group mean differs on the transformed scale, but it does not identify which groups differ or establish a practically large difference.</div>
+
+        <h3>Game length distributions</h3>
+        <p>The box plots show the square root of game length, not raw turns. The notebook notes some large outliers, while medians and interquartile ranges are relatively similar.</p>
+        {{ plot('game-length', 'Box plots of square-root-transformed game lengths for the ten most common named opening families, with outliers.', 'Notebook figure: distribution of square-root-transformed turns by opening family.') }}
+        <details>
+          <summary>View current average game lengths</summary>
+          <p class="note">These descriptive averages are in raw recorded turns, unlike the transformed values in the notebook's box plots and ANOVA.</p>
+          {% if analysis.lengths %}
+            <div class="table-wrap"><table>
+              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th><th scope="col">Average turns</th></tr></thead>
+              <tbody>{% for opening in analysis.lengths %}
+                <tr><th scope="row">{{ opening.name }}</th><td>{{ "{:,}".format(opening.games) }}</td><td>{{ "%.1f"|format(opening.mean) }}</td></tr>
+              {% endfor %}</tbody>
+            </table></div>
+          {% else %}<p>No named opening families found.</p>{% endif %}
+        </details>
+
+        <h3>Checking the assumptions</h3>
+        <p>The ANOVA compares equal transformed group means against the alternative that at least one differs. The notebook assumes independent games and examines normality and constant variance using the following diagnostic plots. Visual checks do not prove these assumptions.</p>
+        <h3>Before transformation</h3>
+        <p>The original Q-Q plots curve away from the reference lines at the upper end, suggesting right-skewed game lengths.</p>
+        {{ plot('qq-original', 'Ten normal Q-Q plots of original game lengths, one for each of the most common named opening families.', 'Notebook figure: Q-Q plots before the square-root transformation.') }}
+        <h3>After transformation</h3>
+        <p>The notebook observes that the transformed points follow the reference lines more closely.</p>
+        {{ plot('qq-transformed', 'Ten normal Q-Q plots of square-root-transformed game lengths, one for each opening family.', 'Notebook figure: Q-Q plots after the square-root transformation.') }}
+        <h3>Residuals</h3>
+        <p>The notebook notes no distinct cone shape in the residual plot, supporting its constant-variance assumption.</p>
+        {{ plot('residuals', 'Scatter plot of transformed game-length residuals against opening-family means, with a zero reference line.', 'Notebook figure: residuals versus group means after transformation.') }}
+      </section>
+      <footer>Charts and test results are from the saved data analysis notebook. Tables use the current local dataset.</footer>
+    {% endif %}
   </main>
-  <script>
-    async function loadWinRates() {
-      const status = document.getElementById("status");
-
-      try {
-        const response = await fetch({{ url_for("win_rates") | tojson }});
-        if (response.status === 503) {
-          const { error } = await response.json();
-          status.textContent = error;
-          return;
-        }
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const { decisive_games, sides } = await response.json();
-        if (decisive_games === 0) {
-          status.textContent = "No decisive games found. Draws are excluded.";
-          return;
-        }
-
-        for (const [side, { wins, rate }] of Object.entries(sides)) {
-          document.getElementById(`${side}-wins`).textContent = wins.toLocaleString();
-          document.getElementById(`${side}-rate`).textContent = `${rate.toFixed(2)}%`;
-        }
-
-        status.textContent = `Win rates are based on ${decisive_games.toLocaleString()} decisive games from the Lichess dataset. Draws are excluded.`;
-        document.getElementById("win-rates").hidden = false;
-      } catch (error) {
-        status.textContent = "Unable to load win rates.";
-        console.error(error);
-      }
-    }
-
-    loadWinRates();
-  </script>
 </body>
 </html>

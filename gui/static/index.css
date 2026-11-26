@@ -1,0 +1,282 @@
+:root {
+  color-scheme: light;
+  --ink: #203d32;
+  --muted: #526e60;
+  --green: #2e614a;
+  --line: #d7e6d9;
+  --paper: #fffefa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #edf5e9;
+  color: var(--ink);
+  font: 16px/1.6 system-ui, sans-serif;
+}
+
+a {
+  color: #275b42;
+}
+
+.wrap {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.hero {
+  background: #d6e9d4;
+  border-bottom: 1px solid #c3dbc5;
+  padding: 3.5rem 0 2.5rem;
+}
+
+.eyebrow {
+  color: #38664b;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2.8rem, 7vw, 5rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0.55rem 0 1rem;
+}
+
+.hero p {
+  color: #41634e;
+  font-size: 1.1rem;
+  max-width: 650px;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+}
+
+nav a {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid #c5dcc8;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  padding: 0.4rem 0.85rem;
+  text-decoration: none;
+}
+
+nav a:hover,
+nav a:focus-visible {
+  background: white;
+  text-decoration: underline;
+}
+
+main {
+  padding: 2rem 0 4rem;
+}
+
+.intro,
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 26px rgba(45, 80, 52, 0.05);
+}
+
+.intro {
+  padding: 1.2rem 1.5rem;
+  color: var(--muted);
+}
+
+.intro p:last-child,
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.card {
+  margin-top: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  scroll-margin-top: 1rem;
+}
+
+.section-label {
+  color: #4b8060;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-family: Georgia, serif;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0.4rem 0 0.8rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin: 1.7rem 0 0.4rem;
+}
+
+.lede {
+  color: var(--muted);
+  margin-left: 10px;
+}
+
+.insight {
+  background: #eaf5e7;
+  border-left: 4px solid #83b58a;
+  border-radius: 0 12px 12px 0;
+  margin: 1.2rem 0;
+  padding: 1rem 1.2rem;
+}
+
+.insight strong {
+  color: #285d40;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.stat {
+  background: #f0f7ed;
+  border: 1px solid #dcebdc;
+  border-radius: 12px;
+  flex: 1 1 150px;
+  padding: 0.85rem 1rem;
+}
+
+.stat strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.stat span,
+.note,
+figcaption {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+figure {
+  background: #fafcf8;
+  border: 1px solid #e1ece0;
+  border-radius: 14px;
+  margin: 1.25rem 0;
+  padding: 1rem;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+figure img[hidden] {
+  display: none;
+}
+
+figcaption {
+  margin-top: 0.75rem;
+}
+
+.plot-error {
+  color: #8a352d;
+}
+
+details {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+}
+
+summary {
+  color: var(--green);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+details[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e5eee4;
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+}
+
+thead th {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding-top: 2rem;
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 2.5rem 0 2rem;
+  }
+
+  figure {
+    padding: 0.5rem;
+    overflow-x: auto;
+  }
+
+  figure img {
+    min-width: 580px;
+  }
+
+  .compact-plot img {
+    min-width: 0;
+  }
+}
