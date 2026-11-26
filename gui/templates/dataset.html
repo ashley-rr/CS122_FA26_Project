@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Piece by Piece | Chess Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <script src="{{ url_for('static', filename='dataset.js') }}" defer></script>
+</head>
+<body>
+    <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">A data story about chess</div>
+      <h1>Piece by Piece</h1>
+      <p>Exploring openings, outcomes, and game length in a collection of Lichess games.</p>
+      <p><em>Project by Ashley Roman and Ashley Dai.</em></p>
+      <nav aria-label="Page sections">
+        <a href="{{ url_for('index') }}">Back to analysis</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% if error %}
+      <div class="intro" role="alert">{{ error }}</div>
+    {% else %}
+    <section class="card" id="dataset">
+        <div class="section-label">Explore the data</div>
+        <h2>The Raw Data</h2>
+        <p>Snippets of our dataset from Kaggle. Scroll horizontally to see all columns.</p>
+        
+        <form class="preview-controls" method="get" action="{{ url_for('data_page') }}" data-preview-url="{{ url_for('dataset_preview') }}" aria-label="Choose a dataset preview">
+          {% for value, (label, count) in preview_options.items() %}
+            <button type="submit" name="preview" value="{{ value }}"{% if selection == value %} class="selected"{% endif %}>{{ label }}</button>
+          {% endfor %}
+        </form>
+        <p id="preview-status" role="status"></p>
+        <div id="preview-results">
+          {% include "_dataset_preview.html" %}
+        </div>
+      </section>
+    {% endif %}
+  </main>
+</body>
+</html>

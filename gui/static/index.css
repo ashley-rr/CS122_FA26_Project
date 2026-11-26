@@ -232,6 +232,52 @@ details[open] summary {
   overflow-x: auto;
 }
 
+.preview-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.preview-controls button {
+  background: #f0f7ed;
+  border: 1px solid #c5dcc8;
+  border-radius: 999px;
+  color: var(--green);
+  cursor: pointer;
+  font: inherit;
+  padding: 0.4rem 0.85rem;
+}
+
+.preview-controls button:hover,
+.preview-controls button.selected {
+  background: #d6e9d4;
+  border-color: #83b58a;
+}
+
+.preview-controls button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.preview-controls button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.data-preview table {
+  width: max-content;
+}
+
+.data-preview th,
+.data-preview td {
+  max-width: 24rem;
+  min-width: 7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 table {
   border-collapse: collapse;
   font-size: calc(0.92rem + 2px);

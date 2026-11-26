@@ -30,6 +30,7 @@
       <p>Exploring openings, outcomes, and game length in a collection of Lichess games.</p>
       <p><em>Project by Ashley Roman and Ashley Dai.</em></p>
       <nav aria-label="Page sections">
+        <a href="{{ url_for('data_page') }}">Explore the data</a>
         <a href="#openings">Opening popularity</a>
         <a href="#color">White vs. Black</a>
         <a href="#rates">Opening win rates</a>
@@ -48,11 +49,11 @@
       <section class="card">
         <p>
           <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <em>{{ "{:,}".format(analysis.total_games) }}</em> games from Lichess.
-          The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle: <a href="https://www.kaggle.com/datasets/datasnaek/chess/data">link</a>.
+          The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle &lpar;<a href="https://www.kaggle.com/datasets/datasnaek/chess/data">external link</a>&rpar;.
         </p>
-        <!-- <div class="intro">
-          
-        </div> -->
+        <p>
+          Or, interact with some rows of the data set <a href="{{ url_for('data_page') }}">here</a>!
+        </p>
       </section>
 
       <section class="card" id="openings">
@@ -177,9 +178,6 @@
             </tbody>
           </table></div>
         </details>
-
-        
-
       </section>
 
       <section class="card" id="rates">
