@@ -19,7 +19,7 @@
 
       <p class="plot-error" hidden>This saved notebook plot is unavailable. Check that the notebook exists and its plot cell has been run and saved.</p>
       
-      <figcaption>{{ caption }}</figcaption>
+      <figcaption><em>{{ caption }}</em></figcaption>
     </figure>
   {% endmacro %}
 
@@ -28,6 +28,7 @@
       <div class="eyebrow">A data story about chess</div>
       <h1>Piece by Piece</h1>
       <p>Exploring openings, outcomes, and game length in a collection of Lichess games.</p>
+      <p><em>Project by Ashley Roman and Ashley Dai.</em></p>
       <nav aria-label="Page sections">
         <a href="#openings">Opening popularity</a>
         <a href="#color">White vs. Black</a>
@@ -43,15 +44,15 @@
       <div class="intro" role="alert">{{ error }}</div>
     {% else %}
 
-    <section class="card">
-      <p>
-        <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <strong>{{ "{:,}".format(analysis.total_games) }}</strong> games from Lichess.
-        The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle: <a href="https://www.kaggle.com/datasets/datasnaek/chess/data">link</a>.
-      </p>
-      <!-- <div class="intro">
-        
-      </div> -->
-    </section>
+      <section class="card">
+        <p>
+          <strong>How do different chess statistics and their relationships affect game outcomes?</strong> Let's analyze <strong>{{ "{:,}".format(analysis.total_games) }}</strong> games from Lichess.
+          The dataset set used is "Chess Game Dataset (Lichess)" from Mitchell J on Kaggle: <a href="https://www.kaggle.com/datasets/datasnaek/chess/data">link</a>.
+        </p>
+        <!-- <div class="intro">
+          
+        </div> -->
+      </section>
 
       <section class="card" id="openings">
         <div class="section-label">01 / Opening popularity</div>
@@ -67,8 +68,6 @@
           <strong>Data Organization</strong>: The original dataset had over <em>{{ "{:,}".format(19000) }}</em> unique opening moves,
           including variations of standard openings. We narrowed this down to <em>18</em> umbrella openings, and 1 fallback category ("Other").
         </p>
-
-        <p class="lede"><strong>Figure 1</strong> shows the frequency of the top 10 most popular opening moves.</p>
         
         {{ plot('opening-frequency', 
             'Horizontal bar chart of the ten most frequent opening families. Other is largest, followed by Sicilian Defense.', 
@@ -84,65 +83,161 @@
             Chess.com describes the <em>"Sicilian Defense"</em> as a "employed by masters and beginners alike... a reputable and positionally sound opening... that tends to lead to dynamic and sharp positions."
             Assumedly, this opening is popular for its flexibility.
           </p>
+          <p>
+            On the other hand, Chess.com describes the <em>"English Opening"</em> as a move most suitable for intermediate to advanced players with a deeper understanding of piece positioning, hence
+            explaining its unpopularity. 
         </div>
 
         <details>
-          <summary>View current opening counts</summary>
+          <summary>View opening counts</summary>
+
           {% if analysis.popular %}
-            <div class="table-wrap"><table>
-              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th></tr></thead>
-              <tbody>{% for name, count in analysis.popular %}
-                <tr><th scope="row">{{ name }}</th><td>{{ "{:,}".format(count) }}</td></tr>
-              {% endfor %}</tbody>
-            </table></div>
-          {% else %}<p>No games found.</p>{% endif %}
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Opening family</th>
+                    <th scope="col">Games</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for name, count in analysis.popular %}
+                    <tr>
+                      <th scope="row">{{ name }}</th>
+                      <td>{{ "{:,}".format(count) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No games found.</p>
+          {% endif %}
         </details>
         
       </section>
 
       <section class="card" id="color">
         <div class="section-label">02 / Overall results</div>
+        
         <h2>Does White win more often?</h2>
+
+        <p class="lede">
+          <strong>Definition</strong>: In Chess, the White side plays the first move. 
+        </p>
+        
+        <p class="lede">
+          <strong>Figure 2</strong>
+          is a pie chart comparison between games won by Black vs. White. Drawn games are not included in the calculation.
+        </p>
+
         {% set wins = analysis.win_rates %}
-        <p class="lede">This comparison excludes draws and looks only at games won by White or Black.</p>
+
+        <div class="insight">
+          <p><strong>Z-Test Set-up</strong>: Let <em>p</em> = the proportion of games won by White, and <em>alpha (significance level)</em> = 0.05.</p> 
+          <p>Set up the Null Hypothesis: White and Black have an equal chance of winning; <em>p = 0.5</em></p>
+          <p>Set up the Alternative Hypothesis: White has a higher chance of winning than Black; <em>p > 0.5</em></p>
+          <p>Assume that the set of games is randomly sampled, each game is independent, and the games have a normal approximation distribution.</p>
+        </div>
+
+        {{ plot('win-rate', 
+          'Pie chart comparing the shares of decisive games won by White and by Black.', 
+          'Figure 2: Win rates by color, excluding draws.', 
+          true) 
+        }}
+
         {% if wins.decisive_games %}
           <div class="stats">
             <div class="stat"><strong>{{ "%.2f"|format(wins.sides.white.rate) }}%</strong><span>White wins</span></div>
             <div class="stat"><strong>{{ "%.2f"|format(wins.sides.black.rate) }}%</strong><span>Black wins</span></div>
             <div class="stat"><strong>{{ "{:,}".format(wins.decisive_games) }}</strong><span>decisive games</span></div>
           </div>
-        {% else %}<p>No decisive games found.</p>{% endif %}
-        {{ plot('win-rate', 'Pie chart comparing the shares of decisive games won by White and by Black.', 'Notebook figure: win rates by color, excluding draws.', true) }}
-        <div class="insight"><strong>The takeaway.</strong> The notebook's one-sided proportion z-test reports p = 4.8e-11, below 0.05. It finds evidence that White won more often in this dataset; this association alone does not establish cause.</div>
+        {% else %}
+          <p>No decisive games found.</p>
+        {% endif %}
+
+        <div class="insight">
+          <p><strong>Key Takeaway</strong>: 
+            Our <em>p-value</em> ends up being 4.8E-11, which is less than our <em>alpha-value</em> of 0.05. Therefore, we reject the 
+            Null Hypothesis, and conclude that there <em>is</em> statistically significant evidence that playing White gives an advantage towards winning a game.
+        </div>
+      
         <details>
-          <summary>Test setup and current counts</summary>
-          <p>Null hypothesis: White wins 50% of decisive games. Alternative: White wins more than 50%. The notebook assumes random sampling, independent games, and a valid normal approximation.</p>
+          <summary>View win counts</summary>
           <div class="table-wrap"><table>
-            <thead><tr><th scope="col">Side</th><th scope="col">Wins</th></tr></thead>
-            <tbody>{% for side in ["white", "black"] %}
-              <tr><th scope="row">{{ side|capitalize }}</th><td>{{ "{:,}".format(wins.sides[side].wins) }}</td></tr>
-            {% endfor %}</tbody>
+            <thead>
+              <tr>
+                <th scope="col">Side</th>
+                <th scope="col">Wins</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for side in ["white", "black"] %}
+                <tr>
+                  <th scope="row">{{ side|capitalize }}</th>
+                  <td>{{ "{:,}".format(wins.sides[side].wins) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
           </table></div>
         </details>
+
+        
+
       </section>
 
       <section class="card" id="rates">
         <div class="section-label">03 / Opening outcomes</div>
-        <h2>Which openings have the highest win rates?</h2>
-        <p class="lede">The notebook compares the five highest and five lowest rates for each color, among opening families with at least 100 games. Here, draws are included in each opening's total, so White and Black rates do not add up to 100%.</p>
-        {{ plot('opening-win-rates', 'Four bar charts showing the five highest and lowest opening-family win rates for White and for Black.', 'Notebook figure: highest and lowest win rates by opening family.') }}
-        <div class="insight"><strong>The takeaway.</strong> King's Gambit has the highest White win rate in the notebook, while Van't Kruijs Opening has the highest Black win rate. These are observed rates, not evidence that an opening causes a win.</div>
+
+        <h2>Which openings win the most?</h2>
+
+        <p class="lede">
+          Here, we compare the five highest and five lowest win rates for each color, among opening families with at 
+          least 100 games. Draws are included in each opening's total, so White and Black rates do not add up to 100%.
+        </p>
+        
+          {{ plot('opening-win-rates', 
+            'Four bar charts showing the five highest and lowest opening-family win rates for White and for Black.', 
+            'Figure 3: Highest and lowest win rates by opening family.') 
+          }}
+
+        <div class="insight">
+          <strong>Key Takeaway.</strong> King's Gambit has the highest win rate for White, while Van't 
+          Kruijs Opening has the highest win rate for Black. However, this is not conclusive evidence that an opening move
+          causes a win.
+        </div>
+        
         <details>
-          <summary>View all qualifying opening families in the current data</summary>
+          <summary>View all opening family win rates per Black and White</summary>
+
           {% if analysis.opening_rates %}
-            <div class="table-wrap"><table>
-              <thead><tr><th scope="col">Opening family</th><th scope="col">Games</th><th scope="col">White wins</th><th scope="col">Black wins</th></tr></thead>
-              <tbody>{% for opening in analysis.opening_rates %}
-                <tr><th scope="row">{{ opening.name }}</th><td>{{ "{:,}".format(opening.games) }}</td><td>{{ "%.2f"|format(opening.white) }}%</td><td>{{ "%.2f"|format(opening.black) }}%</td></tr>
-              {% endfor %}</tbody>
-            </table></div>
-          {% else %}<p>No opening families have at least 100 games.</p>{% endif %}
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Opening family</th>
+                    <th scope="col">Games</th>
+                    <th scope="col">White wins</th>
+                    <th scope="col">Black wins</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for opening in analysis.opening_rates %}
+                    <tr>
+                      <th scope="row">{{ opening.name }}</th>
+                      <td>{{ "{:,}".format(opening.games) }}</td>
+                      <td>{{ "%.2f"|format(opening.white) }}%</td>
+                      <td>{{ "%.2f"|format(opening.black) }}%</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No opening families have at least 100 games.</p>
+          {% endif %}
         </details>
+
       </section>
 
       <section class="card" id="length">
